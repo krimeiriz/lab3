@@ -1,4 +1,6 @@
 ﻿using labWork3.Core.Serializers;
+using labWork3.DB;
+using labWork3.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +16,22 @@ namespace labWork3.Core
         protected readonly Dictionary<int, Contact> Contacts = new Dictionary<int, Contact>();
 
         protected ContactRepository(IList<Contact> contacts) {
-            foreach(Contact contact in contacts)
+            if (contacts.Count > 0)
             {
-                Contacts.Add(contact.Id, contact);
+                Console.WriteLine(contacts.Count);
+                Console.WriteLine(contacts.ToString());
+                foreach (Contact contact in contacts)
+                {
+                    Contacts.Add(contact.Id, contact);
+                }
+                currentId = contacts.DefaultIfEmpty().Max(c => c.Id);
+                Console.WriteLine(currentId);
             }
-            currentId = contacts.DefaultIfEmpty().Max(c => c.Id);
         }
         public static ContactRepository CreateRepository(RepositoryType type, string? path)
         {
             ISerializer serializer;
+            RepositoryDBContext context;
             switch (type)
             {
                 case RepositoryType.JSON:
@@ -31,6 +40,10 @@ namespace labWork3.Core
                 case RepositoryType.XML:
                     serializer = new XMLSerializer(path);
                     return new SerializeBackedContactRepository(serializer);
+                case RepositoryType.DATABASE:
+                    context = new RepositoryDBContext(path);
+                    context.Database.EnsureCreated();
+                    return new DBBackedContactRepository(context);
                 default:
                     throw new ArgumentException();
             }
@@ -38,6 +51,8 @@ namespace labWork3.Core
 
         public virtual void AddContact(Contact contact)
         {
+            currentId++;
+            contact.Id = currentId; 
             Contacts.Add(contact.Id, contact);
         }
 
@@ -127,43 +142,6 @@ namespace labWork3.Core
         {
             currentId = 1;
             Contacts.Clear();
-        }
-    }
-
-    public struct Contact
-    {
-        public int Id { set; get; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Email { get; set; }
-
-        public Contact(string firstName, string lastName, string phoneNumber, string email)
-        {
-            ContactRepository.currentId++;
-            Id = ContactRepository.currentId;
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            Email = email;
-
-        }
-
-        public Contact(int id, string firstName, string lastName, string phoneNumber, string email)
-        {
-            Id = id;
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            Email = email;
-        }
-
-        public override string ToString()
-        {
-            return "#" + Id + " Name:" + FirstName + "\n" +
-                "Lastname: " + LastName + "\n" +
-                "Phone number: " + PhoneNumber + "\n" +
-                "E-mail: " + Email + "\n";
         }
     }
 }

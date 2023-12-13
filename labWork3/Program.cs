@@ -2,17 +2,21 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using labWork3.Core;
+using labWork3.DB;
+using labWork3.Models;
 
 namespace labWork3
 {
     internal class Program
     {
+        
         static ContactRepository? repository;
         static void Main(string[] args)
-        {
+        {         
             while (true)
             {
                 string path;
@@ -33,21 +37,24 @@ namespace labWork3
                         case 2:
                             repositoryType = RepositoryType.XML;
                             break;
-                        //case 3:
-                            //AddContact();
-                         //   break;
-                       // case 4:
-                      //      return;
+                        case 3:
+                            repositoryType = RepositoryType.DATABASE;
+                            break;
+                        case 4:
+                            return;
                         default:
                             throw new FormatException();
                     }
                 }
                 catch(Exception e)
                 {
+                    throw e;
+                    /*
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.StackTrace);
                     Console.WriteLine("Incorrect input. Please, try again.");
                     continue;
+                    */
                 }
 
                 repository = ContactRepository.CreateRepository(repositoryType, path);
@@ -116,7 +123,12 @@ namespace labWork3
             var lastname = NotEmptyInput("Enter lastname: ");
             var phoneNumber = NotEmptyInput("Enter phone number: ");
             var email = NotEmptyInput("Enter e-mail: ");
-            Contact contact = new Contact(firstname,lastname,phoneNumber,email);
+            Contact contact = new Contact{
+                FirstName = firstname,
+                LastName = lastname,
+                PhoneNumber = phoneNumber,
+                Email = email 
+            };
             repository.AddContact(contact);
             Console.WriteLine("Contact added.");
         }

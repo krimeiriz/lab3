@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using labWork3.Models;
 
 namespace labWork3.Core.Serializers
 {
