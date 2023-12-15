@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace labWork3.Core
 {
-    internal class SerializeBackedContactRepository : ContactRepository
+    public class SerializeBackedContactRepository : ContactRepository
     {
         private ISerializer _serializer;
         public SerializeBackedContactRepository(ISerializer serializer)

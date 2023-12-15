@@ -28,7 +28,12 @@ namespace labWork3.Core
         public override void ResetRepository()
         {
             base.ResetRepository();
-            _context.Database.ExecuteSqlRaw("delete from Contacts");
+            var tempList = new List<Contact>();
+            tempList.AddRange(_context.Contacts.ToList());
+            foreach(Contact c in tempList)
+            {
+                _context.Contacts.Remove(c);
+            }
         }
     }
 }

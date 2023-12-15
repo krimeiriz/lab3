@@ -46,15 +46,11 @@ namespace labWork3
                             throw new FormatException();
                     }
                 }
-                catch(Exception e)
+                catch
                 {
-                    throw e;
-                    /*
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
                     Console.WriteLine("Incorrect input. Please, try again.");
                     continue;
-                    */
+                    
                 }
 
                 repository = ContactRepository.CreateRepository(repositoryType, path);

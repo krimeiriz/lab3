@@ -7,7 +7,7 @@ using labWork3.Models;
 
 namespace labWork3.Core.Serializers
 {
-    internal interface ISerializer
+    public interface ISerializer
     {
         IList<Contact> Deserialize();
 

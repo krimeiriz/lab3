@@ -11,11 +11,15 @@ namespace labWork3.DB
 {
     public class RepositoryDBContext : DbContext
     {
-        public DbSet<Contact> Contacts { get; set; }
+        public virtual DbSet<Contact> Contacts { get; set; }
 
         public string DbPath { get; } = DEFAULT_SOURCE_PATH;
         private const string DEFAULT_SOURCE_PATH = "repository_SQLite.db";
 
+        public RepositoryDBContext() : this(null)
+        {
+            
+        }
         public RepositoryDBContext(string? soursePath)
         {
             if (!string.IsNullOrEmpty(soursePath))

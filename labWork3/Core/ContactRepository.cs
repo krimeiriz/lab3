@@ -18,14 +18,11 @@ namespace labWork3.Core
         protected ContactRepository(IList<Contact> contacts) {
             if (contacts.Count > 0)
             {
-                Console.WriteLine(contacts.Count);
-                Console.WriteLine(contacts.ToString());
                 foreach (Contact contact in contacts)
                 {
                     Contacts.Add(contact.Id, contact);
                 }
-                currentId = contacts.DefaultIfEmpty().Max(c => c.Id);
-                Console.WriteLine(currentId);
+                currentId = contacts.Max(c => c.Id);
             }
         }
         public static ContactRepository CreateRepository(RepositoryType type, string? path)
@@ -140,7 +137,7 @@ namespace labWork3.Core
 
         public virtual void ResetRepository()
         {
-            currentId = 1;
+            currentId = 0;
             Contacts.Clear();
         }
     }
