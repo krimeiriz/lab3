@@ -1,30 +1,55 @@
-﻿using System;
+﻿using labWork3.Core.Serializers;
+using labWork3.DB;
+using labWork3.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace labWork3
+namespace labWork3.Core
 {
-    public class ContactRepository
-    {
-        private static ContactRepository Instance;
-
+    public abstract class ContactRepository
+    { 
         internal static int currentId = 0;
-        private readonly Dictionary<int, Contact> Contacts = new Dictionary<int, Contact>();
+        protected readonly Dictionary<int, Contact> Contacts = new Dictionary<int, Contact>();
 
-        private ContactRepository() { }
-
-        public static ContactRepository GetInstance()
+        protected ContactRepository(IList<Contact> contacts) {
+            if (contacts.Count > 0)
+            {
+                foreach (Contact contact in contacts)
+                {
+                    Contacts.Add(contact.Id, contact);
+                }
+                currentId = contacts.Max(c => c.Id);
+            }
+        }
+        public static ContactRepository CreateRepository(RepositoryType type, string? path)
         {
-            if (Instance == null)
-                Instance = new ContactRepository();
-           
-            return Instance;
+            ISerializer serializer;
+            RepositoryDBContext context;
+            switch (type)
+            {
+                case RepositoryType.JSON:
+                    serializer = new JSONSerializer(path);
+                    return new SerializeBackedContactRepository(serializer);
+                case RepositoryType.XML:
+                    serializer = new XMLSerializer(path);
+                    return new SerializeBackedContactRepository(serializer);
+                case RepositoryType.DATABASE:
+                    context = new RepositoryDBContext(path);
+                    context.Database.EnsureCreated();
+                    return new DBBackedContactRepository(context);
+                default:
+                    throw new ArgumentException();
+            }
         }
 
-        public void AddContact(Contact contact)
-        { 
+        public virtual void AddContact(Contact contact)
+        {
+            currentId++;
+            contact.Id = currentId; 
             Contacts.Add(contact.Id, contact);
         }
 
@@ -46,9 +71,9 @@ namespace labWork3
             return resultSet;
         }
 
-        public List<Contact>FindByFirstname(string firstname)
+        public List<Contact> FindByFirstname(string firstname)
         {
-            return FindContactsByPredicate(c => 
+            return FindContactsByPredicate(c =>
             {
                 var cLower = c.FirstName.ToLower();
                 return cLower.Contains(firstname.ToLower());
@@ -110,46 +135,10 @@ namespace labWork3
             });
         }
 
-        public void ResetRepository() 
+        public virtual void ResetRepository()
         {
-            currentId = 1;
+            currentId = 0;
             Contacts.Clear();
-        }
-    }
-
-    public struct Contact{
-        public int Id { private set; get; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Email { get; set; }
-
-        public Contact(string firstName, string lastName, string phoneNumber, string email)
-        {
-            ContactRepository.currentId++;
-            Id = ContactRepository.currentId;
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            Email = email;
-
-        }
-
-        public Contact(int id, string firstName, string lastName, string phoneNumber, string email)
-        {
-            Id = id;
-            FirstName = firstName;
-            LastName = lastName;
-            PhoneNumber = phoneNumber;
-            Email = email;
-        }
-
-        public override string ToString()
-        {
-            return "#" + Id + " Name:" + FirstName + "\n" +
-                "Lastname: " + LastName + "\n" +
-                "Phone number: " + PhoneNumber + "\n" +
-                "E-mail: " + Email + "\n";
         }
     }
 }

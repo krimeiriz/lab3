@@ -2,31 +2,43 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using labWork3.Core;
+using labWork3.DB;
+using labWork3.Models;
 
 namespace labWork3
 {
     internal class Program
-    { 
+    {
+        
+        static ContactRepository? repository;
         static void Main(string[] args)
-        {
+        {         
             while (true)
             {
+                string path;
+                RepositoryType repositoryType;
+
                 PrintRepositoryChoose();
                 try
                 {
                     var ch = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine("Input the source file path, or press enter to use default path.");
+                    path = Console.ReadLine() ?? "";
+                    
                     switch (ch)
                     {
                         case 1:
-                            //PrintAllContacts();
+                            repositoryType = RepositoryType.JSON;
                             break;
                         case 2:
-                            //FindContacts();
+                            repositoryType = RepositoryType.XML;
                             break;
                         case 3:
-                            //AddContact();
+                            repositoryType = RepositoryType.DATABASE;
                             break;
                         case 4:
                             return;
@@ -38,7 +50,10 @@ namespace labWork3
                 {
                     Console.WriteLine("Incorrect input. Please, try again.");
                     continue;
+                    
                 }
+
+                repository = ContactRepository.CreateRepository(repositoryType, path);
                 break;
             }
         
@@ -94,7 +109,7 @@ namespace labWork3
 
         private static void PrintAllContacts() 
         {
-            var contacts = ContactRepository.GetInstance().GetAllContacts();
+            var contacts = repository.GetAllContacts();
             PrintContactsList(contacts);
         }
 
@@ -104,8 +119,13 @@ namespace labWork3
             var lastname = NotEmptyInput("Enter lastname: ");
             var phoneNumber = NotEmptyInput("Enter phone number: ");
             var email = NotEmptyInput("Enter e-mail: ");
-            Contact contact = new Contact(firstname,lastname,phoneNumber,email);
-            ContactRepository.GetInstance().AddContact(contact);
+            Contact contact = new Contact{
+                FirstName = firstname,
+                LastName = lastname,
+                PhoneNumber = phoneNumber,
+                Email = email 
+            };
+            repository.AddContact(contact);
             Console.WriteLine("Contact added.");
         }
 
@@ -187,40 +207,40 @@ namespace labWork3
         private static void FindByFirstname() 
         {
             var firstname = NotEmptyInput("Enter firstname or its port: ");
-            var resultSet =  ContactRepository.GetInstance().FindByFirstname(firstname);
+            var resultSet =  repository.FindByFirstname(firstname);
             PrintContactsList(resultSet);
         }
         private static void FindByLastname()
         {
             var lastname = NotEmptyInput("Enter lastname or its port: ");
-            var resultSet = ContactRepository.GetInstance().FindByLastname(lastname);
+            var resultSet = repository.FindByLastname(lastname);
             PrintContactsList(resultSet);
         }
         private static void FindByFirstAndLastname()
         {
             var firstname = NotEmptyInput("Enter firstname or its port: ");
             var lastname = NotEmptyInput("Enter lastname or its port");
-            var resultSet = ContactRepository.GetInstance().FindByFullname(firstname, lastname);
+            var resultSet = repository.FindByFullname(firstname, lastname);
             PrintContactsList(resultSet);
         }
 
         private static void FindByPhoneNumber() 
         {
             var phoneNumber = NotEmptyInput("Enter phone number or its part: ");
-            var resultSet = ContactRepository.GetInstance().FindByPhoneNumber(phoneNumber);
+            var resultSet = repository.FindByPhoneNumber(phoneNumber);
             PrintContactsList(resultSet);
         }
         private static void FindByEmail()
         {
             var email = NotEmptyInput("Enter email or its part: ");
-            var resultSet = ContactRepository.GetInstance().FindByEmail(email);
+            var resultSet = repository.FindByEmail(email);
             PrintContactsList(resultSet);
         }
 
         private static void FindByWholeFields()
         {
             var any = NotEmptyInput("Enter a part of any field: ");
-            var resultSet = ContactRepository.GetInstance().FindByAnyField(any);
+            var resultSet = repository.FindByAnyField(any);
             PrintContactsList(resultSet);
         }
 
